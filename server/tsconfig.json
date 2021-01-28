@@ -4,7 +4,7 @@
     "allowJs": false,
     "target": "es6",
     "moduleResolution": "node",
-    "module": "commonjs",
+    "module": "es2015",
     "sourceMap": true,
     "declaration": true,
     "experimentalDecorators": true

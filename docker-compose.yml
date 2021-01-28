@@ -1,18 +1,29 @@
 version: '3'
 
+networks:
+  hipages1:
+    driver: bridge
+
 services:
-  ui:
-    entrypoint: ["npm", "start"]
+  database:
+    image: mysql:5.6
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
     environment:
-      NODE_ENV: development
-    image: node:10.15-alpine
+      MYSQL_ROOT_PASSWORD: hipages
+      MYSQL_DATABASE: hipages
     ports:
-      - "3000:3000"
+      - "3306:3306"
+    expose:
+      - '3306'
     volumes:
-      - ./ui:/opt/ui
-    working_dir: /opt/ui
+      - ./docker/mysql:/docker-entrypoint-initdb.d
+    networks:
+        - hipages1
 
   server:
+    depends_on:
+      - database
     entrypoint: ["npm", "start"]
     environment:
       NODE_ENV: development
@@ -24,13 +35,20 @@ services:
     volumes:
       - ./server:/opt/server
     working_dir: /opt/server
-  
-  database:
-    image: mysql:5.6
+    networks:
+        - hipages1
+
+  ui:
+    depends_on:
+      - server
+    entrypoint: ["npm", "start"]
     environment:
-      MYSQL_ROOT_PASSWORD: hipages
-      MYSQL_DATABASE: hipages
+      NODE_ENV: development
+    image: node:10.15-alpine
     ports:
-      - "3306:3306"
+      - "3000:3000"
     volumes:
-      - ./docker/mysql:/docker-entrypoint-initdb.d
+      - ./ui:/opt/ui
+    working_dir: /opt/ui
+    networks:
+        - hipages1
